@@ -1,0 +1,39 @@
+#%RAML 1.0
+title: rest-api
+mediaType:
+  - application/json
+protocols:
+  - HTTP
+/addproducts:
+  post:
+    body:
+      application/json:
+        example:
+          strict: true
+          value:
+            productId: 1
+            name: Hp Pavilion laptop
+            description: "Hp Laptop "
+            originalPrice: 1000
+            offer:
+              offerPrice: 1000
+              offerValidUntil: 1646984894117
+            brandName: HP
+        type: object
+    responses:
+      "400": {}
+      "201": {}
+/allproducts:
+  get:
+    responses:
+      "200": {}
+      "404": {}
+/get-by-name:
+  get:
+    queryParameters:
+      pname:
+        example: apple
+        type: string
+    responses:
+      "200": {}
+      "404": {}
