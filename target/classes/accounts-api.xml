@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<apikit:config outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" doc:name="Router" doc:id="36850a24-66cc-4477-a966-115647fa2709" name="accounts-api-config" api="accounts-api.raml" />
+	<flow name="accounts-api-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="accounts-api-config"/>
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+	<flow name="accounts-api-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accounts-api-config"/>
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <sub-flow name="accounts-putSubflow" doc:id="62c176bb-920a-4e6c-a78b-0dbd5c1e2be9">
+		<choice doc:name="Choice" doc:id="14c995ed-e4a8-4966-990f-ec88bf19b9d3">
+			<when expression="#[payload.affectedRows == 0]">
+				<ee:transform doc:name="Transform Message" doc:id="ed1c9dba-d7fe-4d6b-befa-9b14dc98bcc3">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.hold]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="a5cf4ce0-6289-415d-b393-97cd4110c5bf" message="#[vars.hold]" />
+				<db:insert doc:name="Insert" doc:id="0d5a92cd-3bfc-4519-a15b-797efd394c96" config-ref="Database_Config">
+					<db:sql><![CDATA[insert into flights_customers(ID,FIRSTNAME,LASTNAME,ADDRESS,POSTAL,COUNTRY,MILES,ACCOUNT_TYPE) values
+(:ID,:FIRSTNAME,:LASTNAME,:ADDRESS,:POSTAL,:COUNTRY,:MILES,:ACCOUNT_TYPE)]]></db:sql>
+					<db:input-parameters><![CDATA[#[output application/java
+---
+{
+	ID: vars.id,
+	FIRSTNAME: payload."0".firstname,
+	LASTNAME: payload."0".lastname,
+	ADDRESS: payload."0".address,
+	POSTAL: payload."0".postal,
+	COUNTRY: payload."0".country,
+	MILES: payload."0".miles,
+	ACCOUNT_TYPE: payload."0".accounttype
+}]]]></db:input-parameters>
+				</db:insert>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="5e5dc294-00b6-4a21-b156-6381058c4125" message="data is updates successfully" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<flow name="put:\accounts\(id):application\json:accounts-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="put:\accounts\(id):application\json:accounts-api-config" />
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="2878186c-df53-451b-94cd-9f0915ea3cf8" variableName="id"/>
+		<ee:transform doc:name="Transform Message" doc:id="bd98d76f-c71b-49e5-8a46-968b197b7bf7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="53650f6e-afcb-4fb5-99fd-a98ae4084f6f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map {
+	($$):$
+} )}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="19a26500-3a39-47a5-8e1b-cab9b3a7be87" variableName="hold" />
+		<logger level="INFO" doc:name="Logger" doc:id="8b26271e-2b0d-4028-a2f6-75be258d2590" message="#[payload]"/>
+		<db:update doc:name="Update" doc:id="d87c212f-0215-44df-8bc5-6560842c6844" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE flights_customers  SET FIRSTNAME = :FIRSTNAME,LASTNAME = :LASTNAME WHERE ID = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/json
+---
+{
+	FIRSTNAME: payload."0".firstname,
+	LASTNAME: payload."0".lastname,
+	id:vars.id
+}]]]></db:input-parameters>
+		</db:update>
+		<flow-ref doc:name="Flow Reference" doc:id="dd86daf8-6d30-4362-8661-51aad303331b" name="accounts-putSubflow" />
+		<ee:transform doc:name="Transform Message" doc:id="f0ab24aa-15b5-4438-8339-f1694728e33c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"account replaced (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3adfbb07-dbb2-44f7-a611-7c297d7e2ea8" message="end "/>
+    </flow>
+	<flow name="delete:\accounts\(id):accounts-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\accounts\(id):accounts-api-config" />
+		<db:delete doc:name="Delete" doc:id="faf51df6-8b5a-4b76-b4a5-372665423c3c" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE from flights_customers where id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[id:attributes.uriParams.id]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="84c3667a-c213-4cfc-94ed-cf5deaf2dc8b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "account deleted (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="patch:\accounts\(id):application\json:accounts-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="id"><![CDATA[id:attributes.uriParams.id]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<logger level="INFO" message="patch:\accounts\(id):application\json:accounts-api-config" />
+		<ee:transform doc:name="Transform Message" doc:id="c8345ffe-08a9-49a0-abcb-1a0a62cd4daa" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map {
+	($$):$
+} )}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="a4a8e7c6-1e57-429d-97c6-2cb9d1c143cf" variableName="id"/>
+		<db:update doc:name="Update" doc:id="f23877d8-0032-4f94-b9ae-cea93a29d7c2" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE flights_customers  SET MILES = :miles  WHERE id = :id
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/json
+---
+{
+	id:vars.id,
+	miles:payload."0".miles
+}]]]></db:input-parameters>
+		</db:update>
+		<logger level="INFO" doc:name="Logger" doc:id="f376b3a7-70c1-4a68-99db-a91ccb0049af" />
+		<ee:transform doc:name="Transform Message" doc:id="22516cc7-8934-49f3-b94d-3bfce10ab783" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"account modified (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+    <flow name="get:\accounts:accounts-api-config">
+        <logger level="INFO" message="get:\accounts:accounts-api-config" />
+		<db:select doc:id="8f61fab0-5d9d-4930-ad0d-1dfed19dd31c" doc:name="Select" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from flights_customers where account_type = :account_type]]></db:sql>
+			<db:input-parameters ><![CDATA[#[account_type:attributes.queryParams.accounttype]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3b31f8ae-aed1-4d08-b62a-710c74c4c2a3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="168068bf-6e74-4837-8704-09769da14d4c" message="data is retived successfully" />
+    </flow>
+    <flow name="post:\accounts:application\json:accounts-api-config">
+        <logger level="INFO" message="post:\accounts:application\json:accounts-api-config" />
+		<ee:transform doc:name="Transform Message" doc:id="b81adc9e-ffb2-4bff-adec-5d7b55bdccd5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="65c0b53e-1260-42cc-801e-80260ceef46b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map {
+	($$):$
+} )}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value='#[payload."0".id ++ payload."0".firstname ++ payload."0".lastname ++ payload."0".postal]' doc:name="Set Variable" doc:id="f137a43a-48df-4726-a280-20c4c20d2aae" variableName="salesid" />
+		<logger level="INFO" doc:name="Logger" doc:id="d4ffc187-3085-461f-a9a9-81dd644b79ac" message="#[payload]"/>
+		<db:insert doc:name="Insert" doc:id="bbfc66ad-d549-4f13-be58-c19ba1b17e43" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into flights_customers(ID,FIRSTNAME,LASTNAME,ADDRESS,POSTAL,COUNTRY,MILES,ACCOUNT_TYPE,SALESID) values
+(:ID,:FIRSTNAME,:LASTNAME,:ADDRESS,:POSTAL,:COUNTRY,:MILES,:ACCOUNT_TYPE,:SALESID)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/java
+---
+{
+	ID: payload."0".id,
+	FIRSTNAME: payload."0".firstname,
+	LASTNAME: payload[0][2],
+	ADDRESS: payload[0][3],
+	POSTAL: payload[0][4],
+	COUNTRY: payload[0][5],
+	MILES: payload[0][6]  ,
+	ACCOUNT_TYPE: payload[0][7],
+	SALESID: vars.salesid
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="dcc7fbac-d581-4964-ada0-9b4faf5ba2ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  message: "Account created (but not really)"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="78cd4c79-6e4b-4111-91d7-97a161b404ba" message="data is sccessfully inserted " />
+    </flow>
+</mule>

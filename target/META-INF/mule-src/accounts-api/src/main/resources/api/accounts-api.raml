@@ -1,0 +1,190 @@
+#%RAML 1.0
+title: Accounts Api
+description: To retrieve ,post , update and delete the accounts data in databse
+mediaType:
+  - application/json
+protocols:
+  - HTTP
+/accounts:
+  get:
+    description: "\"To Get the accounts data from the Database\""
+    queryParameters:
+      name?:
+        example: venugopal
+        type: string
+      country?:
+        example: india
+        type: string
+      accounttype:
+        enum:
+          - personal
+          - business
+        example: personal
+        type: string
+    headers:
+      id:
+        example: "1"
+        type: string
+    responses:
+      "200":
+        body:
+          items:
+            properties:
+              id:
+                example: "1"
+                type: string
+              firstname:
+                example: venu
+                type: string
+              lastname:
+                example: gopal
+                type: string
+              address:
+                example: hyd
+                type: string
+              postal:
+                example: "583972"
+                type: string
+              country:
+                example: india
+                type: string
+              creationdate:
+                example: 2022-03-24T12:37:15
+                type: datetime-only
+              miles:
+                example: 101
+                type: number
+                format: int
+              accounttype:
+                example: personal
+                type: string
+      "400": {}
+  post:
+    body:
+      items:
+        properties:
+          id:
+            example: "1"
+            type: string
+          firstname:
+            example: venu
+            type: string
+          lastname:
+            example: gopal
+            type: string
+          address:
+            example: Hyd
+            type: string
+          country:
+            example: india
+            type: string
+          postal:
+            example: "578497"
+            type: string
+          miles:
+            example: 102
+            type: number
+            format: int
+          accounttype:
+            example: personal
+            type: string
+    responses:
+      "200":
+        body:
+          properties:
+            message:
+              example: Account created (but not really)
+              type: string
+      "400": {}
+/accounts/{id}:
+  put:
+    responses:
+      "200":
+        body:
+          properties:
+            message:
+              example: account replaced (but not really)
+              type: string
+      "400": {}
+    description: it is used to replace the record
+    body:
+      items:
+        properties:
+          firstname?:
+            example: ravi
+            type: string
+          lastname?:
+            example: kumar
+            type: string
+          address?:
+            example: hyd
+            type: string
+          postal?:
+            example: "584893"
+            type: string
+          country?:
+            example: india
+            type: string
+          miles?:
+            example: 103
+            type: number
+            format: int
+          accounttype?:
+            example: personal
+            type: string
+          id?:
+            example: "1"
+            type: string
+  patch:
+    responses:
+      "201":
+        body:
+          properties:
+            message:
+              example: account modified (but not really)
+              type: string
+      "400": {}
+    description: "it is used to update in the record "
+    body:
+      items:
+        properties:
+          id?:
+            example: "1"
+            type: string
+          firstname?:
+            example: venu
+            type: string
+          lastname?:
+            example: gopal
+            type: string
+          address?:
+            example: hyd
+            type: string
+          postal?:
+            example: "464738"
+            type: string
+          country?:
+            example: india
+            type: string
+          miles?:
+            example: 123
+            type: number
+            format: int
+          accounttype?:
+            example: personal
+            type: string
+  uriParameters:
+    id:
+      example: "1"
+      type: string
+  delete:
+    description: "it is used to delete the record "
+    body: {}
+    responses:
+      "200":
+        body:
+          properties:
+            message:
+              example: account deleted (but not really)
+              type: string
+      "400": {}

@@ -1,9 +1,9 @@
 http:
-  host: "0.0.0.0"
-  port: "8092"
-  rest:
-    host: "localhost"
-    port: "7070"
-    path: "/rest/products"
-    pathbyname: "/rest/products/{name}"
+  host: "localhost"
+  port: "8099"
   
+db:
+  host: "localhost"
+  port: "1521"
+  user: "system"
+  password: "![jRNuUCqApuW3kFwBbmAKgg==]"
