@@ -37,7 +37,7 @@
 						<targetType>server</targetType>
 						<username>venu2002</username>
 						<password>Dolly@1234</password>
-						<applicationName>accounts-api2</applicationName>
+						<applicationName>rest-api</applicationName>
 						<environment>Sandbox</environment>
 						<businessGroupId>9ac88664-08ec-4a76-90b2-2e03fecea920</businessGroupId>
 						<properties>
